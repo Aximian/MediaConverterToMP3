@@ -12,46 +12,62 @@ namespace MediaConverterToMP3.Views
     {
         private void UpdateSourceSelector()
         {
-            if (_selectedSource == "Spotify")
+            // Reset all selectors to unselected state first
+            void SetUnselected(System.Windows.Controls.Border selector)
             {
-                // Spotify selected - green and black
-                SpotifySelector.Background = new System.Windows.Media.SolidColorBrush(
-                    (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#1DB954"));
-                SpotifySelector.Effect = new System.Windows.Media.Effects.DropShadowEffect
+                selector.Background = new System.Windows.Media.SolidColorBrush(
+                    (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#282828"));
+                selector.Effect = null;
+                if (selector.Child is System.Windows.Controls.StackPanel stackPanel && stackPanel.Children.Count > 1)
                 {
-                    Color = System.Windows.Media.Color.FromRgb(29, 185, 84),
+                    if (stackPanel.Children[1] is System.Windows.Controls.TextBlock textBlock)
+                    {
+                        textBlock.Foreground = new System.Windows.Media.SolidColorBrush(
+                            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#B3B3B3"));
+                    }
+                }
+            }
+
+            void SetSelected(System.Windows.Controls.Border selector, System.Windows.Media.Color color, string title, string subtitle, string tooltipText, string emptyStateText)
+            {
+                selector.Background = new System.Windows.Media.SolidColorBrush(color);
+                selector.Effect = new System.Windows.Media.Effects.DropShadowEffect
+                {
+                    Color = color,
                     Direction = 270,
                     ShadowDepth = 3,
                     BlurRadius = 8,
                     Opacity = 0.5
                 };
-                ((System.Windows.Controls.TextBlock)((System.Windows.Controls.StackPanel)SpotifySelector.Child).Children[1]).Foreground =
-                    System.Windows.Media.Brushes.White;
-
-                // YouTube unselected - dark
-                YouTubeSelector.Background = new System.Windows.Media.SolidColorBrush(
-                    (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#282828"));
-                YouTubeSelector.Effect = null;
-                ((System.Windows.Controls.TextBlock)((System.Windows.Controls.StackPanel)YouTubeSelector.Child).Children[1]).Foreground =
-                    new System.Windows.Media.SolidColorBrush(
-                        (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#B3B3B3"));
-
-                TitleText.Text = "🎵 Spotify to MP3";
-                SubtitleText.Text = "Convert your favorite Spotify tracks to MP3";
-
-                // Hide format selector for Spotify
-                FormatSelectorPanel.Visibility = Visibility.Collapsed;
-
-                // Update tooltip
+                if (selector.Child is System.Windows.Controls.StackPanel stackPanel && stackPanel.Children.Count > 1)
+                {
+                    if (stackPanel.Children[1] is System.Windows.Controls.TextBlock textBlock)
+                    {
+                        textBlock.Foreground = System.Windows.Media.Brushes.White;
+                    }
+                }
+                TitleText.Text = title;
+                SubtitleText.Text = subtitle;
                 if (SearchTextBox.ToolTip is ToolTip tooltip)
                 {
-                    tooltip.Content = "Enter a song name, artist, or paste a Spotify track/playlist URL. Plain text will search Spotify for similar songs.";
+                    tooltip.Content = tooltipText;
                 }
-
-                // Update empty state text
-                EmptyStateText.Text = "🎵 Search for tracks, or paste a Spotify track/playlist URL to get started";
+                EmptyStateText.Text = emptyStateText;
             }
-            else // YouTube
+
+            if (_selectedSource == "Spotify")
+            {
+                SetSelected(SpotifySelector, System.Windows.Media.Color.FromRgb(29, 185, 84),
+                    "🎵 Spotify to MP3",
+                    "Convert your favorite Spotify tracks to MP3",
+                    "Enter a song name, artist, or paste a Spotify track/playlist URL. Plain text will search Spotify for similar songs.",
+                    "🎵 Search for tracks, or paste a Spotify track/playlist URL to get started");
+                SetUnselected(YouTubeSelector);
+                SetUnselected(InstagramSelector);
+                SetUnselected(TikTokSelector);
+                FormatSelectorPanel.Visibility = Visibility.Collapsed;
+            }
+            else if (_selectedSource == "YouTube")
             {
                 // YouTube selected - blue and red gradient
                 var gradientBrush = new System.Windows.Media.LinearGradientBrush();
@@ -70,33 +86,102 @@ namespace MediaConverterToMP3.Views
                     BlurRadius = 8,
                     Opacity = 0.5
                 };
-                ((System.Windows.Controls.TextBlock)((System.Windows.Controls.StackPanel)YouTubeSelector.Child).Children[1]).Foreground =
-                    System.Windows.Media.Brushes.White;
-
-                // Spotify unselected - dark
-                SpotifySelector.Background = new System.Windows.Media.SolidColorBrush(
-                    (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#282828"));
-                SpotifySelector.Effect = null;
-                ((System.Windows.Controls.TextBlock)((System.Windows.Controls.StackPanel)SpotifySelector.Child).Children[1]).Foreground =
-                    new System.Windows.Media.SolidColorBrush(
-                        (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#B3B3B3"));
-
-                // Show format selector for YouTube
+                if (YouTubeSelector.Child is System.Windows.Controls.StackPanel ytStackPanel && ytStackPanel.Children.Count > 1)
+                {
+                    if (ytStackPanel.Children[1] is System.Windows.Controls.TextBlock ytTextBlock)
+                    {
+                        ytTextBlock.Foreground = System.Windows.Media.Brushes.White;
+                    }
+                }
+                SetUnselected(SpotifySelector);
+                SetUnselected(InstagramSelector);
+                SetUnselected(TikTokSelector);
                 FormatSelectorPanel.Visibility = Visibility.Visible;
                 UpdateFormatSelector();
-
                 string formatText = _selectedFormat == "MP4" ? "MP4" : "MP3";
                 TitleText.Text = $"▶️ YouTube to {formatText}";
                 SubtitleText.Text = $"Convert your favorite YouTube videos to {formatText}";
-
-                // Update tooltip
                 if (SearchTextBox.ToolTip is ToolTip tooltip)
                 {
                     tooltip.Content = "Enter a song name or paste a YouTube video URL. Plain text will search YouTube for similar videos.";
                 }
-
-                // Update empty state text
                 EmptyStateText.Text = "▶️ Search for videos, or paste a YouTube video URL to get started";
+            }
+            else if (_selectedSource == "Instagram")
+            {
+                // Instagram gradient: purple to pink
+                var instagramGradient = new System.Windows.Media.LinearGradientBrush();
+                instagramGradient.StartPoint = new System.Windows.Point(0, 0);
+                instagramGradient.EndPoint = new System.Windows.Point(1, 0);
+                instagramGradient.GradientStops.Add(new System.Windows.Media.GradientStop(
+                    System.Windows.Media.Color.FromRgb(225, 48, 108), 0.0)); // Pink
+                instagramGradient.GradientStops.Add(new System.Windows.Media.GradientStop(
+                    System.Windows.Media.Color.FromRgb(131, 58, 180), 1.0)); // Purple
+                InstagramSelector.Background = instagramGradient;
+                InstagramSelector.Effect = new System.Windows.Media.Effects.DropShadowEffect
+                {
+                    Color = System.Windows.Media.Color.FromRgb(131, 58, 180),
+                    Direction = 270,
+                    ShadowDepth = 3,
+                    BlurRadius = 8,
+                    Opacity = 0.5
+                };
+                if (InstagramSelector.Child is System.Windows.Controls.StackPanel igStackPanel && igStackPanel.Children.Count > 1)
+                {
+                    if (igStackPanel.Children[1] is System.Windows.Controls.TextBlock igTextBlock)
+                    {
+                        igTextBlock.Foreground = System.Windows.Media.Brushes.White;
+                    }
+                }
+                SetUnselected(SpotifySelector);
+                SetUnselected(YouTubeSelector);
+                SetUnselected(TikTokSelector);
+                FormatSelectorPanel.Visibility = Visibility.Collapsed;
+                TitleText.Text = "📷 Instagram Reels to MP4";
+                SubtitleText.Text = "Download Instagram Reels as MP4";
+                if (SearchTextBox.ToolTip is ToolTip tooltip)
+                {
+                    tooltip.Content = "Paste an Instagram Reel URL to download as MP4.";
+                }
+                EmptyStateText.Text = "📷 Paste an Instagram Reel URL to get started";
+            }
+            else if (_selectedSource == "TikTok")
+            {
+                // TikTok: cyan gradient (TikTok brand color)
+                var tiktokGradient = new System.Windows.Media.LinearGradientBrush();
+                tiktokGradient.StartPoint = new System.Windows.Point(0, 0);
+                tiktokGradient.EndPoint = new System.Windows.Point(1, 0);
+                tiktokGradient.GradientStops.Add(new System.Windows.Media.GradientStop(
+                    System.Windows.Media.Color.FromRgb(0, 242, 234), 0.0)); // Cyan
+                tiktokGradient.GradientStops.Add(new System.Windows.Media.GradientStop(
+                    System.Windows.Media.Color.FromRgb(255, 0, 80), 1.0)); // Pink/Red
+                TikTokSelector.Background = tiktokGradient;
+                TikTokSelector.Effect = new System.Windows.Media.Effects.DropShadowEffect
+                {
+                    Color = System.Windows.Media.Color.FromRgb(0, 242, 234),
+                    Direction = 270,
+                    ShadowDepth = 3,
+                    BlurRadius = 8,
+                    Opacity = 0.5
+                };
+                if (TikTokSelector.Child is System.Windows.Controls.StackPanel tiktokStackPanel && tiktokStackPanel.Children.Count > 1)
+                {
+                    if (tiktokStackPanel.Children[1] is System.Windows.Controls.TextBlock tiktokTextBlock)
+                    {
+                        tiktokTextBlock.Foreground = System.Windows.Media.Brushes.White;
+                    }
+                }
+                SetUnselected(SpotifySelector);
+                SetUnselected(YouTubeSelector);
+                SetUnselected(InstagramSelector);
+                FormatSelectorPanel.Visibility = Visibility.Collapsed;
+                TitleText.Text = "🎵 TikTok to MP4";
+                SubtitleText.Text = "Download TikTok videos as MP4";
+                if (SearchTextBox.ToolTip is ToolTip tooltip)
+                {
+                    tooltip.Content = "Paste a TikTok video URL to download as MP4.";
+                }
+                EmptyStateText.Text = "🎵 Paste a TikTok video URL to get started";
             }
         }
 
@@ -183,7 +268,7 @@ namespace MediaConverterToMP3.Views
             string baseFileName = $"{FileUtilities.SanitizeFileName(fileNameTitle)} - {FileUtilities.SanitizeFileName(fileNameArtist)}";
             
             // Check if file already exists first (before checking cache)
-            string extension = _selectedSource == "YouTube" && _selectedFormat == "MP4" ? ".mp4" : ".mp3";
+            string extension = ((_selectedSource == "YouTube" && _selectedFormat == "MP4") || _selectedSource == "Instagram" || _selectedSource == "TikTok") ? ".mp4" : ".mp3";
             string outputPath = Path.Combine(_downloadPath, $"{baseFileName}{extension}");
             bool fileExists = File.Exists(outputPath);
             
@@ -192,7 +277,13 @@ namespace MediaConverterToMP3.Views
             {
                 var cache = Models.DownloadCache.Load();
                 var cacheEntry = cache.GetEntry(track.Id);
-                if (cacheEntry != null && cacheEntry.Source == _selectedSource && cacheEntry.Format == _selectedFormat)
+                // Determine expected format: Instagram and TikTok default to MP4
+                string expectedFormat = _selectedFormat;
+                if (_selectedSource == "Instagram" || _selectedSource == "TikTok")
+                {
+                    expectedFormat = "MP4";
+                }
+                if (cacheEntry != null && cacheEntry.Source == _selectedSource && cacheEntry.Format == expectedFormat)
                 {
                     // Check if temp file still exists
                     bool tempFileExists = false;
@@ -246,6 +337,11 @@ namespace MediaConverterToMP3.Views
                         {
                             track.SpotifyButtonText = "";
                         }
+                        // Hide Spotify button for Instagram and TikTok (MP4 videos cannot be added to Spotify)
+                        else if (_selectedSource == "Instagram" || _selectedSource == "TikTok")
+                        {
+                            track.SpotifyButtonText = "";
+                        }
                         // Check Spotify button status for YouTube MP3 tracks
                         else if (!string.IsNullOrEmpty(_spotifyLocalFilesPath))
                         {
@@ -280,6 +376,11 @@ namespace MediaConverterToMP3.Views
             }
             // Hide Spotify button when MP4 format is selected (MP4 cannot be added to Spotify)
             else if (_selectedSource == "YouTube" && _selectedFormat == "MP4")
+            {
+                track.SpotifyButtonText = "";
+            }
+            // Hide Spotify button for Instagram and TikTok (MP4 videos cannot be added to Spotify)
+            else if (_selectedSource == "Instagram" || _selectedSource == "TikTok")
             {
                 track.SpotifyButtonText = "";
             }

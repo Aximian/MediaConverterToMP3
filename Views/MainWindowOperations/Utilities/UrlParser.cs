@@ -165,6 +165,84 @@ namespace MediaConverterToMP3.Views.MainWindowOperations.Utilities
 
             return null;
         }
+
+        public static bool IsInstagramUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+                return false;
+
+            return url.Contains("instagram.com") || url.Contains("instagr.am");
+        }
+
+        public static bool IsTikTokUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+                return false;
+
+            return url.Contains("tiktok.com") || url.Contains("vm.tiktok.com");
+        }
+
+        public static string? ExtractInstagramReelId(string url)
+        {
+            // Handle Instagram Reel URL formats:
+            // https://www.instagram.com/reel/ABC123/
+            // https://www.instagram.com/reels/ABC123/
+            // https://instagram.com/reel/ABC123/
+            // https://www.instagram.com/p/ABC123/ (posts can also be reels)
+
+            if (string.IsNullOrEmpty(url))
+                return null;
+
+            try
+            {
+                // Reel URL pattern
+                var reelMatch = Regex.Match(url, @"instagram\.com/(?:reel|reels|p)/([a-zA-Z0-9_-]+)", RegexOptions.IgnoreCase);
+                if (reelMatch.Success)
+                {
+                    return reelMatch.Groups[1].Value;
+                }
+            }
+            catch
+            {
+                // Ignore regex errors
+            }
+
+            return null;
+        }
+
+        public static string? ExtractTikTokVideoId(string url)
+        {
+            // Handle TikTok URL formats:
+            // https://www.tiktok.com/@username/video/1234567890
+            // https://vm.tiktok.com/ABC123/
+            // https://tiktok.com/@username/video/1234567890
+
+            if (string.IsNullOrEmpty(url))
+                return null;
+
+            try
+            {
+                // Standard TikTok video URL
+                var videoMatch = Regex.Match(url, @"tiktok\.com/@[^/]+/video/(\d+)", RegexOptions.IgnoreCase);
+                if (videoMatch.Success)
+                {
+                    return videoMatch.Groups[1].Value;
+                }
+
+                // Short vm.tiktok.com URL - we'll need to resolve it, but for now return the short code
+                var shortMatch = Regex.Match(url, @"vm\.tiktok\.com/([a-zA-Z0-9]+)", RegexOptions.IgnoreCase);
+                if (shortMatch.Success)
+                {
+                    return shortMatch.Groups[1].Value;
+                }
+            }
+            catch
+            {
+                // Ignore regex errors
+            }
+
+            return null;
+        }
     }
 }
 

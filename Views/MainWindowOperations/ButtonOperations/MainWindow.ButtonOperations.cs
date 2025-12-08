@@ -17,13 +17,22 @@ namespace MediaConverterToMP3.Views
         private void SourceSelector_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var border = sender as System.Windows.Controls.Border;
-            if (border?.Tag?.ToString() == "Spotify")
+            string? tag = border?.Tag?.ToString();
+            if (tag == "Spotify")
             {
                 _selectedSource = "Spotify";
             }
-            else if (border?.Tag?.ToString() == "YouTube")
+            else if (tag == "YouTube")
             {
                 _selectedSource = "YouTube";
+            }
+            else if (tag == "Instagram")
+            {
+                _selectedSource = "Instagram";
+            }
+            else if (tag == "TikTok")
+            {
+                _selectedSource = "TikTok";
             }
             UpdateSourceSelector();
             

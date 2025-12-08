@@ -1,6 +1,6 @@
-# Media Converter to MP3
+# Media Converter to MP3/MP4
 
-A C# WPF application that searches and downloads music from both Spotify and YouTube, converting them to MP3 or MP4 files using Spotify's API and yt-dlp. Includes built-in support for adding downloaded MP3 files directly to Spotify Local Files.
+A C# WPF application that downloads media from Spotify, YouTube, Instagram Reels, and TikTok, converting them to MP3 or MP4 files using Spotify's API and yt-dlp. Includes built-in support for adding downloaded MP3 files directly to Spotify Local Files.
 
 ## Quick Start
 
@@ -8,7 +8,7 @@ A C# WPF application that searches and downloads music from both Spotify and You
 1. **[Download the latest release](https://github.com/Aximian/MediaConverterToMP3/releases/latest)** and extract it
 2. Run `MediaConverterToMP3.exe` from the extracted folder
 3. Click Settings and enter your Spotify credentials (required for Spotify searches, see below)
-4. Select your source (Spotify or YouTube) using the selector in the top left
+4. Select your source (Spotify, YouTube, Instagram, or TikTok) using the selector in the top left
 5. Start searching and downloading
 
 ## Getting Spotify Credentials
@@ -30,9 +30,13 @@ A C# WPF application that searches and downloads music from both Spotify and You
 ## How to Use
 
 ### Source Selection
-- Use the source selector in the top left corner to switch between **Spotify** (green) and **YouTube** (blue/red)
-- Spotify requires credentials (see below), YouTube works without any setup
+- Use the source selector in the top left corner to switch between:
+  - **Spotify** (green) - Requires credentials (see below)
+  - **YouTube** (blue/red gradient) - Works without setup, supports MP3/MP4
+  - **Instagram** (purple/pink gradient) - Works without setup, downloads as MP4
+  - **TikTok** (cyan/pink gradient) - Works without setup, downloads as MP4
 - When YouTube is selected, you can choose between **MP3** or **MP4** format using the format selector
+- Instagram and TikTok automatically download as MP4 (video format)
 
 ### Searching
 
@@ -49,6 +53,18 @@ A C# WPF application that searches and downloads music from both Spotify and You
    - Or paste a YouTube video URL
    - Press Enter or click Search
    - Results show up to 30 matching videos
+
+3. **For Instagram Reels:**
+   - Select Instagram from the source selector
+   - Paste an Instagram Reel URL (e.g., `https://www.instagram.com/reel/ABC123/`)
+   - Press Enter or click Search
+   - Downloads as MP4 automatically
+
+4. **For TikTok:**
+   - Select TikTok from the source selector
+   - Paste a TikTok video URL (e.g., `https://www.tiktok.com/@username/video/1234567890` or `https://vm.tiktok.com/ABC123/`)
+   - Press Enter or click Search
+   - Downloads as MP4 automatically
 
 ### Downloading
 
@@ -67,7 +83,9 @@ A C# WPF application that searches and downloads music from both Spotify and You
 - **Note:** MP4 files cannot be added to Spotify (only MP3 supported)
 - **Note:** The "Add to Spotify Local" button is automatically hidden for:
   - Spotify source tracks (they're already from Spotify)
-  - MP4 format tracks (MP4 cannot be added to Spotify)
+  - YouTube MP4 format tracks (MP4 cannot be added to Spotify)
+  - Instagram Reels (MP4 videos cannot be added to Spotify)
+  - TikTok videos (MP4 videos cannot be added to Spotify)
 
 #### macOS
 **Note:** WPF is Windows-only. For macOS support, the UI needs to be ported to a cross-platform framework like Avalonia UI or .NET MAUI.
@@ -79,12 +97,14 @@ Currently, macOS builds are not available. To add macOS support:
 
 ## Features
 
-- 🎵 **Dual Source Support**: Search and download from both Spotify and YouTube
+- 🎵 **Multi-Source Support**: Download from Spotify, YouTube, Instagram Reels, and TikTok
 - 🎬 **Format Selection**: Choose MP3 (audio) or MP4 (video) format for YouTube downloads
-- 🔍 **Smart Search**: Text search or direct URL support for both platforms
+- 📷 **Instagram Reels**: Download Instagram Reels as MP4 videos
+- 🎵 **TikTok Videos**: Download TikTok videos as MP4 videos
+- 🔍 **Smart Search**: Text search or direct URL support for all platforms
 - 🎨 **Modern UI**: Clean, intuitive interface with source and format selectors
 - 🔽 **Filter Results**: Filter loaded tracks by title, artist, or album
-- ⚡ **Fast Downloads**: Optimized YouTube search and image loading
+- ⚡ **Fast Downloads**: Optimized search and image loading
 - 📥 **Bulk Operations**: Download all tracks or add all MP3s to Spotify at once
 - 📁 **Organized Output**: Files saved with proper naming (Title - Artist.mp3/mp4)
 - 🎧 **Spotify Integration**: Add downloaded MP3 files directly to Spotify Local Files
@@ -116,13 +136,19 @@ Currently, macOS builds are not available. To add macOS support:
 
 **"Add to Spotify Local" button not showing**
 - Make sure you've configured the Spotify Local Files path in Settings
-- The button only appears for YouTube MP3 tracks (not MP4 or Spotify source tracks)
+- The button only appears for YouTube MP3 tracks (not MP4, Spotify, Instagram, or TikTok source tracks)
 - Ensure the track has been downloaded as MP3 first
 
 **MP4 downloads not working**
 - Ensure yt-dlp is up to date (MP4 support requires recent version)
 - Check that FFmpeg is properly installed and accessible
 - Some videos may have download restrictions
+
+**Instagram or TikTok downloads failing**
+- Ensure yt-dlp is up to date (these platforms require recent yt-dlp version)
+- Check that the URL is valid and the content is publicly accessible
+- Some content may be private or region-restricted
+- For TikTok: Short URLs (vm.tiktok.com) may need to resolve first
 
 ## Important Notes
 

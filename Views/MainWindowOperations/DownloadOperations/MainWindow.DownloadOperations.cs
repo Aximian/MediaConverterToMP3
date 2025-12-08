@@ -82,7 +82,7 @@ namespace MediaConverterToMP3.Views
                 if (stopCacheEntry == null)
                 {
                     // Create new cache entry if it doesn't exist
-                    string stopExtension = _selectedSource == "YouTube" && _selectedFormat == "MP4" ? ".mp4" : ".mp3";
+                    string stopExtension = ((_selectedSource == "YouTube" && _selectedFormat == "MP4") || _selectedSource == "Instagram" || _selectedSource == "TikTok") ? ".mp4" : ".mp3";
                     string stopOutputPath = Path.Combine(_downloadPath, $"{FileUtilities.SanitizeFileName(track.Title)} - {FileUtilities.SanitizeFileName(track.Artist)}{stopExtension}");
                     
                     // Determine search query
@@ -153,7 +153,7 @@ namespace MediaConverterToMP3.Views
 
             // Use saved download path - determine extension based on source and format
             string extension = ".mp3";
-            if (_selectedSource == "YouTube" && _selectedFormat == "MP4")
+            if ((_selectedSource == "YouTube" && _selectedFormat == "MP4") || _selectedSource == "Instagram" || _selectedSource == "TikTok")
             {
                 extension = ".mp4";
             }
@@ -180,7 +180,13 @@ namespace MediaConverterToMP3.Views
             // Check cache for partial download
             var cache = DownloadCache.Load();
             var cacheEntry = cache.GetEntry(track.Id);
-            if (cacheEntry != null && cacheEntry.Source == _selectedSource && cacheEntry.Format == _selectedFormat)
+            // Determine expected format: Instagram and TikTok default to MP4
+            string expectedFormat = _selectedFormat;
+            if (_selectedSource == "Instagram" || _selectedSource == "TikTok")
+            {
+                expectedFormat = "MP4";
+            }
+            if (cacheEntry != null && cacheEntry.Source == _selectedSource && cacheEntry.Format == expectedFormat)
             {
                 // Check if temp file still exists
                 bool tempFileExists = false;
@@ -363,6 +369,11 @@ namespace MediaConverterToMP3.Views
                     // If it's a YouTube search query, use the title
                     searchQuery = track.Title;
                 }
+                else if (_selectedSource == "Instagram" || _selectedSource == "TikTok")
+                {
+                    // For Instagram and TikTok, track.Id contains the URL
+                    searchQuery = track.Id;
+                }
                 else
                 {
                     // For Spotify or general search, use title and artist
@@ -538,6 +549,12 @@ namespace MediaConverterToMP3.Views
 
                 // Create or update cache entry
                 var cache = DownloadCache.Load();
+                // Determine format: Instagram and TikTok default to MP4
+                string cacheFormat = _selectedFormat;
+                if (_selectedSource == "Instagram" || _selectedSource == "TikTok")
+                {
+                    cacheFormat = "MP4";
+                }
                 var cacheEntry = existingCacheEntry ?? new DownloadCacheEntry
                 {
                     TrackId = track.Id,
@@ -547,7 +564,7 @@ namespace MediaConverterToMP3.Views
                     TempFilePattern = tempPathPattern,
                     DownloadUrl = downloadUrl,
                     Source = _selectedSource,
-                    Format = _selectedFormat,
+                    Format = cacheFormat,
                     Progress = 0,
                     Timestamp = DateTime.Now
                 };
@@ -562,12 +579,24 @@ namespace MediaConverterToMP3.Views
                 cache.SetEntry(track.Id, cacheEntry);
 
                 // Determine format and download arguments
-                bool isMP4 = _selectedSource == "YouTube" && _selectedFormat == "MP4";
+                bool isMP4 = (_selectedSource == "YouTube" && _selectedFormat == "MP4") || 
+                             (_selectedSource == "Instagram") || 
+                             (_selectedSource == "TikTok");
                 string downloadArgs;
                 if (isMP4)
                 {
-                    // Use format selector that avoids problematic formats
-                    downloadArgs = $"-f \"bestvideo[height<=1080]+bestaudio/best[height<=1080]/bestvideo+bestaudio/best\" --no-playlist --concurrent-fragments 8 --progress --newline --default-search \"ytsearch\" --output \"{tempPathPattern}.%(ext)s\" \"{downloadUrl}\"";
+                    // For MP4: Download best video format
+                    // For Instagram and TikTok, default to MP4 (video format)
+                    if (_selectedSource == "YouTube")
+                    {
+                        // Use format selector that avoids problematic formats for YouTube
+                        downloadArgs = $"-f \"bestvideo[height<=1080]+bestaudio/best[height<=1080]/bestvideo+bestaudio/best\" --no-playlist --concurrent-fragments 8 --progress --newline --default-search \"ytsearch\" --output \"{tempPathPattern}.%(ext)s\" \"{downloadUrl}\"";
+                    }
+                    else
+                    {
+                        // For Instagram and TikTok, download best video format
+                        downloadArgs = $"-f \"bestvideo[height<=1080]+bestaudio/best[height<=1080]/bestvideo+bestaudio/best\" --no-playlist --concurrent-fragments 8 --progress --newline --output \"{tempPathPattern}.%(ext)s\" \"{downloadUrl}\"";
+                    }
                 }
                 else
                 {
@@ -627,7 +656,7 @@ namespace MediaConverterToMP3.Views
                                 // Update progress - for MP4, download is 100% of process; for MP3, it's 50%
                                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                                 {
-                                    bool isMP4Local = _selectedSource == "YouTube" && _selectedFormat == "MP4";
+                                    bool isMP4Local = (_selectedSource == "YouTube" && _selectedFormat == "MP4") || _selectedSource == "Instagram" || _selectedSource == "TikTok";
                                     double totalProgress = isMP4Local ? progress : (progress * 0.5); // MP4: 100%, MP3: 50% (conversion is other 50%)
                                     track.DownloadProgress = totalProgress;
                                     
@@ -658,7 +687,7 @@ namespace MediaConverterToMP3.Views
                                 // Update progress - for MP4, download is 100% of process; for MP3, it's 50%
                                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                                 {
-                                    bool isMP4Local = _selectedSource == "YouTube" && _selectedFormat == "MP4";
+                                    bool isMP4Local = (_selectedSource == "YouTube" && _selectedFormat == "MP4") || _selectedSource == "Instagram" || _selectedSource == "TikTok";
                                     double totalProgress = isMP4Local ? progress : (progress * 0.5); // MP4: 100%, MP3: 50% (conversion is other 50%)
                                     track.DownloadProgress = totalProgress;
                                     
@@ -1387,7 +1416,7 @@ namespace MediaConverterToMP3.Views
                         string fileNameArtist = string.IsNullOrWhiteSpace(track.Artist) ? "Unknown Artist" : track.Artist;
                         // Use the currently selected format (MP3 or MP4 for YouTube)
                         string extension = ".mp3";
-                        if (_selectedSource == "YouTube" && _selectedFormat == "MP4")
+                        if ((_selectedSource == "YouTube" && _selectedFormat == "MP4") || _selectedSource == "Instagram" || _selectedSource == "TikTok")
                         {
                             extension = ".mp4";
                         }
@@ -1575,7 +1604,7 @@ namespace MediaConverterToMP3.Views
                 // No cache entry, start fresh
                 ClearStoppedDownload(track);
                 // Start a fresh download
-                string freshExtension = _selectedSource == "YouTube" && _selectedFormat == "MP4" ? ".mp4" : ".mp3";
+                string freshExtension = ((_selectedSource == "YouTube" && _selectedFormat == "MP4") || _selectedSource == "Instagram" || _selectedSource == "TikTok") ? ".mp4" : ".mp3";
                 string freshOutputPath = Path.Combine(_downloadPath, $"{FileUtilities.SanitizeFileName(track.Title)} - {FileUtilities.SanitizeFileName(track.Artist)}{freshExtension}");
                 
                 // Check if file already exists
@@ -1694,7 +1723,7 @@ namespace MediaConverterToMP3.Views
             }
 
             // Use saved download path - determine extension based on source and format
-            string extension = _selectedSource == "YouTube" && _selectedFormat == "MP4" ? ".mp4" : ".mp3";
+            string extension = ((_selectedSource == "YouTube" && _selectedFormat == "MP4") || _selectedSource == "Instagram" || _selectedSource == "TikTok") ? ".mp4" : ".mp3";
             string outputPath = Path.Combine(_downloadPath, $"{FileUtilities.SanitizeFileName(track.Title)} - {FileUtilities.SanitizeFileName(track.Artist)}{extension}");
 
             // Check if file already exists

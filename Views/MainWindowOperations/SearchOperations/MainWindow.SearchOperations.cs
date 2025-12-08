@@ -85,7 +85,7 @@ namespace MediaConverterToMP3.Views
                         }
                     }
                 }
-                else // YouTube
+                else if (_selectedSource == "YouTube")
                 {
                     // Check if input looks like a URL but is not YouTube
                     if (UrlParser.IsUrl(searchQuery) && !UrlParser.IsYouTubeUrl(searchQuery))
@@ -112,6 +112,50 @@ namespace MediaConverterToMP3.Views
                     {
                         // Regular search - treat as song name
                         await LoadYouTubeSearch(searchQuery);
+                    }
+                }
+                else if (_selectedSource == "Instagram")
+                {
+                    // Check if input looks like a URL but is not Instagram
+                    if (UrlParser.IsUrl(searchQuery) && !UrlParser.IsInstagramUrl(searchQuery))
+                    {
+                        ShowErrorDialog("Invalid URL",
+                            $"The URL you entered is not a valid Instagram URL.\n\nPlease enter:\n• An Instagram Reel URL (e.g., https://www.instagram.com/reel/...)\n• Or https://www.instagram.com/p/...");
+                        return;
+                    }
+
+                    // Check if input is an Instagram URL
+                    if (UrlParser.IsInstagramUrl(searchQuery))
+                    {
+                        // Load Instagram reel
+                        await LoadInstagramReel(searchQuery);
+                    }
+                    else
+                    {
+                        ShowErrorDialog("Invalid Input",
+                            "Please paste an Instagram Reel URL to download.\n\nExample: https://www.instagram.com/reel/ABC123/");
+                    }
+                }
+                else if (_selectedSource == "TikTok")
+                {
+                    // Check if input looks like a URL but is not TikTok
+                    if (UrlParser.IsUrl(searchQuery) && !UrlParser.IsTikTokUrl(searchQuery))
+                    {
+                        ShowErrorDialog("Invalid URL",
+                            $"The URL you entered is not a valid TikTok URL.\n\nPlease enter:\n• A TikTok video URL (e.g., https://www.tiktok.com/@username/video/...)\n• Or https://vm.tiktok.com/...");
+                        return;
+                    }
+
+                    // Check if input is a TikTok URL
+                    if (UrlParser.IsTikTokUrl(searchQuery))
+                    {
+                        // Load TikTok video
+                        await LoadTikTokVideo(searchQuery);
+                    }
+                    else
+                    {
+                        ShowErrorDialog("Invalid Input",
+                            "Please paste a TikTok video URL to download.\n\nExample: https://www.tiktok.com/@username/video/1234567890");
                     }
                 }
             }
