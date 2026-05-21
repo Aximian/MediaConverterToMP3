@@ -108,6 +108,8 @@ namespace MediaConverterToMP3.Views
                     SearchTextBox.Focus();
                     Keyboard.Focus(SearchTextBox);
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
+
+                _ = CheckAndUpdateYtDlpAsync();
             };
         }
 

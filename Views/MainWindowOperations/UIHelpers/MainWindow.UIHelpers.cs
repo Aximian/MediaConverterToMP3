@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using MediaConverterToMP3.Models;
@@ -452,6 +453,58 @@ namespace MediaConverterToMP3.Views
                 track.CanDownload = !mp3Exists;
                 track.DownloadButtonText = mp3Exists ? "Already Downloaded ✓" : "Download";
             }
+        }
+
+        private async Task CheckAndUpdateYtDlpAsync()
+        {
+            try
+            {
+                var settings = AppSettings.Load();
+                if (settings.LastYtDlpUpdateCheck.HasValue &&
+                    (DateTime.Now - settings.LastYtDlpUpdateCheck.Value).TotalHours < 24)
+                    return;
+
+                string? ytDlpPath = FileUtilities.FindYtDlp();
+                if (string.IsNullOrEmpty(ytDlpPath))
+                    return;
+
+                Dispatcher.Invoke(() => StatusText.Text = "Checking for yt-dlp updates...");
+
+                var processInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = ytDlpPath,
+                    Arguments = "-U",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var process = System.Diagnostics.Process.Start(processInfo);
+                if (process == null) return;
+
+                var output = new System.Text.StringBuilder();
+                process.OutputDataReceived += (s, e) => { if (e.Data != null) output.AppendLine(e.Data); };
+                process.BeginOutputReadLine();
+
+                await Task.Run(() => process.WaitForExit());
+
+                settings.LastYtDlpUpdateCheck = DateTime.Now;
+                settings.Save();
+
+                string result = output.ToString();
+                bool updated = result.Contains("Updated yt-dlp") || result.Contains("Updating to");
+                Dispatcher.Invoke(() =>
+                    StatusText.Text = updated ? "yt-dlp updated successfully." : "yt-dlp is up to date.");
+
+                await Task.Delay(3000);
+                Dispatcher.Invoke(() =>
+                {
+                    if (StatusText.Text == "yt-dlp updated successfully." || StatusText.Text == "yt-dlp is up to date.")
+                        StatusText.Text = "Ready";
+                });
+            }
+            catch { }
         }
 
         private void LoadFilterIcon()
