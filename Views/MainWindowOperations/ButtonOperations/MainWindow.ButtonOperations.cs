@@ -95,14 +95,12 @@ namespace MediaConverterToMP3.Views
                 // Update Spotify local files path
                 _spotifyLocalFilesPath = settingsWindow.SpotifyLocalFilesPath;
 
-                // Save settings
-                var settings = new Models.AppSettings
-                {
-                    DownloadPath = _downloadPath,
-                    SpotifyClientId = _clientId,
-                    SpotifyClientSecret = _clientSecret,
-                    SpotifyLocalFilesPath = _spotifyLocalFilesPath
-                };
+                // Save settings — load first to preserve fields not tracked as window-level state
+                var settings = Models.AppSettings.Load();
+                settings.DownloadPath = _downloadPath;
+                settings.SpotifyClientId = _clientId;
+                settings.SpotifyClientSecret = _clientSecret;
+                settings.SpotifyLocalFilesPath = _spotifyLocalFilesPath;
                 settings.Save();
 
                 // Ensure directory exists
@@ -139,7 +137,7 @@ namespace MediaConverterToMP3.Views
                     _downloadCancellationTokenSource.Cancel();
 
                     // Kill all active processes
-                    lock (_activeProcesses ?? new List<System.Diagnostics.Process>())
+                    lock (_processLock)
                     {
                         if (_activeProcesses != null)
                         {

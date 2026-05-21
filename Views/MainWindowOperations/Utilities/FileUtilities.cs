@@ -169,6 +169,22 @@ namespace MediaConverterToMP3.Views.MainWindowOperations.Utilities
             return null;
         }
 
+        public static string EscapeForArg(string value)
+        {
+            // Escape for Windows CreateProcess argument rules (CommandLineToArgvW):
+            // backslashes preceding a quote must be doubled, all quotes escaped as \"
+            var sb = new System.Text.StringBuilder();
+            int slashes = 0;
+            foreach (char c in value)
+            {
+                if (c == '\\') { slashes++; }
+                else if (c == '"') { sb.Append('\\', slashes * 2 + 1); sb.Append('"'); slashes = 0; }
+                else { sb.Append('\\', slashes); sb.Append(c); slashes = 0; }
+            }
+            sb.Append('\\', slashes * 2); // double trailing backslashes
+            return sb.ToString();
+        }
+
         public static string SanitizeFileName(string fileName)
         {
             char[] invalidChars = Path.GetInvalidFileNameChars();

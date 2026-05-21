@@ -68,6 +68,7 @@ namespace MediaConverterToMP3.Views
                         try { process.Kill(); } catch { }
                         throw new Exception("Loading video timed out after 30 seconds.");
                     }
+                    process.WaitForExit(); // flush async output streams
 
                     if (process.ExitCode != 0)
                     {
@@ -324,6 +325,7 @@ namespace MediaConverterToMP3.Views
                         try { process.Kill(); } catch { }
                         throw new Exception("YouTube search timed out after 10 seconds.");
                     }
+                    process.WaitForExit(); // flush async output streams
 
                     // Wait for streams to close (with shorter timeout for speed)
                     outputComplete.WaitOne(1000);

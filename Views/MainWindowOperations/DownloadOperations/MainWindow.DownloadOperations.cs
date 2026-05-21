@@ -434,7 +434,8 @@ namespace MediaConverterToMP3.Views
                                         infoOutput.AppendLine(e.Data);
                                 };
                                 infoProcess.BeginOutputReadLine();
-                                infoProcess.WaitForExit(2000); // 2 second timeout (reduced for faster downloads)
+                                bool infoExited = infoProcess.WaitForExit(2000); // 2 second timeout
+                                if (infoExited) infoProcess.WaitForExit(); // flush async output streams
 
                                 if (infoProcess.ExitCode == 0)
                                 {
@@ -631,7 +632,7 @@ namespace MediaConverterToMP3.Views
                 }
 
                 // Register process for cancellation
-                lock (_activeProcesses ?? new List<System.Diagnostics.Process>())
+                lock (_processLock)
                 {
                     _activeProcesses?.Add(downloadProcess);
                 }
@@ -659,15 +660,6 @@ namespace MediaConverterToMP3.Views
                                     bool isMP4Local = (_selectedSource == "YouTube" && _selectedFormat == "MP4") || _selectedSource == "Instagram" || _selectedSource == "TikTok";
                                     double totalProgress = isMP4Local ? progress : (progress * 0.5); // MP4: 100%, MP3: 50% (conversion is other 50%)
                                     track.DownloadProgress = totalProgress;
-                                    
-                                    // Update cache with progress
-                                    var progressCache = DownloadCache.Load();
-                                    var progressEntry = progressCache.GetEntry(track.Id);
-                                    if (progressEntry != null)
-                                    {
-                                        progressEntry.Progress = totalProgress;
-                                        progressCache.SetEntry(track.Id, progressEntry);
-                                    }
                                     // Don't update StatusText here - let the timer handle progressive display
                                 }, System.Windows.Threading.DispatcherPriority.Background);
                             }
@@ -690,15 +682,6 @@ namespace MediaConverterToMP3.Views
                                     bool isMP4Local = (_selectedSource == "YouTube" && _selectedFormat == "MP4") || _selectedSource == "Instagram" || _selectedSource == "TikTok";
                                     double totalProgress = isMP4Local ? progress : (progress * 0.5); // MP4: 100%, MP3: 50% (conversion is other 50%)
                                     track.DownloadProgress = totalProgress;
-                                    
-                                    // Update cache with progress
-                                    var progressCache = DownloadCache.Load();
-                                    var progressEntry = progressCache.GetEntry(track.Id);
-                                    if (progressEntry != null)
-                                    {
-                                        progressEntry.Progress = totalProgress;
-                                        progressCache.SetEntry(track.Id, progressEntry);
-                                    }
                                 }, System.Windows.Threading.DispatcherPriority.Background);
                             }
                         }
@@ -734,7 +717,7 @@ namespace MediaConverterToMP3.Views
                 }
                 finally
                 {
-                    lock (_activeProcesses ?? new List<System.Diagnostics.Process>())
+                    lock (_processLock)
                     {
                         _activeProcesses?.Remove(downloadProcess);
                     }
@@ -776,7 +759,7 @@ namespace MediaConverterToMP3.Views
                             !value.Equals("Unknown Album", StringComparison.OrdinalIgnoreCase) &&
                             !value.Equals("YouTube", StringComparison.OrdinalIgnoreCase))
                         {
-                            string escaped = value.Replace("\"", "\\\"").Replace("$", "\\$");
+                            string escaped = FileUtilities.EscapeForArg(value);
                             mp4MetadataArgs.Append($" -metadata {key}=\"{escaped}\"");
                         }
                     }
@@ -917,7 +900,7 @@ namespace MediaConverterToMP3.Views
                         !value.Equals("Unknown Album", StringComparison.OrdinalIgnoreCase) &&
                         !value.Equals("YouTube", StringComparison.OrdinalIgnoreCase))
                     {
-                        string escaped = value.Replace("\"", "\\\"").Replace("$", "\\$");
+                        string escaped = FileUtilities.EscapeForArg(value);
                         metadataArgs.Append($" -metadata {key}=\"{escaped}\"");
                     }
                 }
@@ -950,7 +933,7 @@ namespace MediaConverterToMP3.Views
                 }
 
                 // Register process for cancellation
-                lock (_activeProcesses ?? new List<System.Diagnostics.Process>())
+                lock (_processLock)
                 {
                     _activeProcesses?.Add(convertProcess);
                 }
@@ -998,15 +981,6 @@ namespace MediaConverterToMP3.Views
                                 {
                                     double totalProgress = 50 + conversionProgress; // 50% (download) + conversion progress
                                     track.DownloadProgress = totalProgress;
-                                    
-                                    // Update cache with progress
-                                    var progressCache = DownloadCache.Load();
-                                    var progressEntry = progressCache.GetEntry(track.Id);
-                                    if (progressEntry != null)
-                                    {
-                                        progressEntry.Progress = totalProgress;
-                                        progressCache.SetEntry(track.Id, progressEntry);
-                                    }
                                     // Don't update StatusText here - let the timer handle progressive display
                                 }, System.Windows.Threading.DispatcherPriority.Background);
                             }
@@ -1040,7 +1014,7 @@ namespace MediaConverterToMP3.Views
                 }
                 finally
                 {
-                    lock (_activeProcesses ?? new List<System.Diagnostics.Process>())
+                    lock (_processLock)
                     {
                         _activeProcesses?.Remove(convertProcess);
                     }
