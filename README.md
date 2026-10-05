@@ -120,6 +120,7 @@ Currently, macOS builds are not available. To add macOS support:
 - Make sure you've entered credentials in Settings
 
 **"yt-dlp not found" or "FFmpeg not found"**
+- The app now attempts to download `yt-dlp.exe` automatically when it is missing
 - For standalone builds: Make sure the .exe files are in the same folder as MediaConverterToMP3.exe
 - For development: Place them in the `bin` folder
 - These tools are required for YouTube downloads
