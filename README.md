@@ -1,4 +1,4 @@
-# Media Converter to MP3/MP4
+﻿# Media Converter to MP3/MP4
 
 A C# WPF application that downloads media from Spotify, YouTube, Instagram Reels, and TikTok, converting them to MP3 or MP4 files using Spotify's API and yt-dlp. Includes built-in support for adding downloaded MP3 files directly to Spotify Local Files.
 
@@ -165,3 +165,9 @@ MIT License - see [Docs/LICENSE](Docs/LICENSE) for details
 ## Contributing
 
 Contributions welcome. See [Docs/CONTRIBUTING.md](Docs/CONTRIBUTING.md) for guidelines.
+
+### YouTube runtime and sign-in
+
+YouTube downloads (including audio matched from Spotify) need a supported JavaScript runtime. Install Deno or Node.js and restart the app, or place `deno.exe` beside `yt-dlp.exe`. The app detects Deno first, then Node.js, in the application folder, yt-dlp folder, and PATH. See the [yt-dlp runtime requirements](https://github.com/yt-dlp/yt-dlp/wiki/EJS).
+
+For videos requiring sign-in or age verification, open **Settings > YouTube sign-in**, select the browser where you are signed in to an eligible YouTube account, save, and retry. This explicitly enables yt-dlp to read that browser's cookies for YouTube and Spotify downloads; the default **None** disables it. Browser cookie extraction may fail if the browser is open or its cookie encryption is unsupported. This setting does not bypass account eligibility requirements. See the [yt-dlp cookie FAQ](https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp).

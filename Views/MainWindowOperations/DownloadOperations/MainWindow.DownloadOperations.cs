@@ -826,7 +826,7 @@ namespace MediaConverterToMP3.Views
                         {
                             string error = errorBuilder.ToString();
                             // If metadata addition fails, just use the original file (non-critical)
-                            System.Diagnostics.Debug.WriteLine($"Warning: Failed to add metadata to MP4: {YouTubeOptions.DescribeError(error)}");
+                            System.Diagnostics.Debug.WriteLine($"Warning: Failed to add metadata to MP4: {error}");
                             if (File.Exists(downloadedFile))
                             {
                                 File.Move(downloadedFile, outputPath, true);
@@ -1009,7 +1009,7 @@ namespace MediaConverterToMP3.Views
                         string error = convertErrorBuilder.ToString();
                         if (string.IsNullOrWhiteSpace(error))
                             error = $"Process exited with code {convertProcess.ExitCode}";
-                        throw new Exception($"FFmpeg conversion error (exit code {convertProcess.ExitCode}):\n{YouTubeOptions.DescribeError(error)}");
+                        throw new Exception($"FFmpeg conversion error (exit code {convertProcess.ExitCode}):\n{error}");
                     }
                 }
                 finally
