@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -73,7 +73,7 @@ namespace MediaConverterToMP3.Views
         {
             // Load current settings to pass to settings window
             var currentSettings = Models.AppSettings.Load();
-            var settingsWindow = new SettingsWindow(_downloadPath, currentSettings.SpotifyClientId, currentSettings.SpotifyClientSecret, currentSettings.SpotifyLocalFilesPath)
+            var settingsWindow = new SettingsWindow(_downloadPath, currentSettings.SpotifyClientId, currentSettings.SpotifyClientSecret, currentSettings.SpotifyLocalFilesPath, currentSettings.YouTubeCookiesBrowser)
             {
                 Owner = this
             };
@@ -101,6 +101,7 @@ namespace MediaConverterToMP3.Views
                 settings.SpotifyClientId = _clientId;
                 settings.SpotifyClientSecret = _clientSecret;
                 settings.SpotifyLocalFilesPath = _spotifyLocalFilesPath;
+                settings.YouTubeCookiesBrowser = settingsWindow.YouTubeCookiesBrowser;
                 settings.Save();
 
                 // Ensure directory exists

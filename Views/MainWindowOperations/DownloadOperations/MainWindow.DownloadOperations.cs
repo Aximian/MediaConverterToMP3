@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -412,11 +412,11 @@ namespace MediaConverterToMP3.Views
                     {
                         // Fetch full metadata for this video
                         // Using android client to avoid JS runtime requirements
-                        string infoArgs = $"--dump-json --no-playlist --no-warnings --quiet --extractor-args \"youtube:player_client=android\" \"https://www.youtube.com/watch?v={track.Id}\"";
+                        string infoArgs = $"--dump-json --no-playlist --no-warnings --quiet \"https://www.youtube.com/watch?v={track.Id}\"";
                         var infoProcessInfo = new System.Diagnostics.ProcessStartInfo
                         {
                             FileName = ytDlpPath,
-                            Arguments = infoArgs,
+                            Arguments = YouTubeOptions.GetArguments(ytDlpPath) + infoArgs,
                             UseShellExecute = false,
                             RedirectStandardOutput = true,
                             RedirectStandardError = true,
@@ -617,7 +617,7 @@ namespace MediaConverterToMP3.Views
                 var downloadProcessInfo = new System.Diagnostics.ProcessStartInfo
                 {
                     FileName = ytDlpPath,
-                    Arguments = downloadArgs,
+                    Arguments = ((_selectedSource == "Spotify" || _selectedSource == "YouTube") ? YouTubeOptions.GetArguments(ytDlpPath) : "") + downloadArgs,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -712,7 +712,7 @@ namespace MediaConverterToMP3.Views
                             error = outputBuilder.ToString();
                         if (string.IsNullOrWhiteSpace(error))
                             error = $"Process exited with code {downloadProcess.ExitCode}";
-                        throw new Exception($"yt-dlp download error (exit code {downloadProcess.ExitCode}):\n{error}");
+                        throw new Exception($"yt-dlp download error (exit code {downloadProcess.ExitCode}):\n{YouTubeOptions.DescribeError(error)}");
                     }
                 }
                 finally
@@ -826,7 +826,7 @@ namespace MediaConverterToMP3.Views
                         {
                             string error = errorBuilder.ToString();
                             // If metadata addition fails, just use the original file (non-critical)
-                            System.Diagnostics.Debug.WriteLine($"Warning: Failed to add metadata to MP4: {error}");
+                            System.Diagnostics.Debug.WriteLine($"Warning: Failed to add metadata to MP4: {YouTubeOptions.DescribeError(error)}");
                             if (File.Exists(downloadedFile))
                             {
                                 File.Move(downloadedFile, outputPath, true);
@@ -1009,7 +1009,7 @@ namespace MediaConverterToMP3.Views
                         string error = convertErrorBuilder.ToString();
                         if (string.IsNullOrWhiteSpace(error))
                             error = $"Process exited with code {convertProcess.ExitCode}";
-                        throw new Exception($"FFmpeg conversion error (exit code {convertProcess.ExitCode}):\n{error}");
+                        throw new Exception($"FFmpeg conversion error (exit code {convertProcess.ExitCode}):\n{YouTubeOptions.DescribeError(error)}");
                     }
                 }
                 finally

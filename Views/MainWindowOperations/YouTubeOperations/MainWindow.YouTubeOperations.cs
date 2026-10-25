@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -30,11 +30,11 @@ namespace MediaConverterToMP3.Views
                 }
 
                 // Get video information
-                string infoArgs = $"--dump-json --no-playlist --extractor-args \"youtube:player_client=android\" \"https://www.youtube.com/watch?v={videoId}\"";
+                string infoArgs = $"--dump-json --no-playlist \"https://www.youtube.com/watch?v={videoId}\"";
                 var processInfo = new System.Diagnostics.ProcessStartInfo
                 {
                     FileName = ytDlpPath,
-                    Arguments = infoArgs,
+                    Arguments = YouTubeOptions.GetArguments(ytDlpPath) + infoArgs,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -265,12 +265,12 @@ namespace MediaConverterToMP3.Views
                 }
 
                 string searchUrl = $"ytsearch30:{searchQuery}";
-                string infoArgs = $"--flat-playlist --dump-json --no-playlist --no-warnings --quiet --no-progress --extractor-args \"youtube:player_client=android\" \"{searchUrl}\"";
+                string infoArgs = $"--flat-playlist --dump-json --no-playlist --no-warnings --quiet --no-progress \"{searchUrl}\"";
 
                 var processInfo = new System.Diagnostics.ProcessStartInfo
                 {
                     FileName = ytDlpPath,
-                    Arguments = infoArgs,
+                    Arguments = YouTubeOptions.GetArguments(ytDlpPath) + infoArgs,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -338,7 +338,7 @@ namespace MediaConverterToMP3.Views
                             error = outputBuilder.ToString();
                         if (string.IsNullOrWhiteSpace(error))
                             error = $"Process exited with code {process.ExitCode}";
-                        throw new Exception($"YouTube search failed: {error}");
+                        throw new Exception($"YouTube search failed: {YouTubeOptions.DescribeError(error)}");
                     }
 
                     string output = outputBuilder.ToString();

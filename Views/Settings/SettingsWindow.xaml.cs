@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Forms;
@@ -7,14 +7,17 @@ namespace MediaConverterToMP3.Views
 {
     public partial class SettingsWindow : Window
     {
+        public string? YouTubeCookiesBrowser { get; private set; }
         public string DownloadPath { get; private set; }
         public string? SpotifyClientId { get; private set; }
         public string? SpotifyClientSecret { get; private set; }
         public string? SpotifyLocalFilesPath { get; private set; }
 
-        public SettingsWindow(string currentPath, string? clientId = null, string? clientSecret = null, string? spotifyLocalFilesPath = null)
+        public SettingsWindow(string currentPath, string? clientId = null, string? clientSecret = null, string? spotifyLocalFilesPath = null, string? youtubeCookiesBrowser = null)
         {
             InitializeComponent();
+            YouTubeBrowserComboBox.ItemsSource = MainWindowOperations.Utilities.YouTubeOptions.Browsers;
+            YouTubeBrowserComboBox.SelectedItem = youtubeCookiesBrowser ?? "None";
             DownloadPath = currentPath;
             PathTextBlock.Text = DownloadPath;
 
@@ -106,6 +109,7 @@ namespace MediaConverterToMP3.Views
             // Save Spotify local files path (can be empty)
             SpotifyLocalFilesPath = string.IsNullOrWhiteSpace(SpotifyPathTextBlock.Text) ? null : SpotifyPathTextBlock.Text.Trim();
 
+            YouTubeCookiesBrowser = YouTubeBrowserComboBox.SelectedItem as string;
             DialogResult = true;
             Close();
         }

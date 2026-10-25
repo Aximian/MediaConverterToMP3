@@ -1,4 +1,4 @@
-<Window x:Class="MediaConverterToMP3.Views.MainWindow"
+﻿<Window x:Class="MediaConverterToMP3.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Media Converter to MP3/MP4" Height="900" Width="1400"
@@ -662,7 +662,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <DockPanel Grid.Column="0" VerticalAlignment="Center">
                     <TextBlock Text="● " 
                                FontSize="12"
                                Foreground="{StaticResource PrimaryColor}"
@@ -670,10 +670,11 @@
                                Margin="0,0,8,0"/>
                     <TextBlock x:Name="StatusText"
                                Text="Ready to search..."
+                               TextWrapping="Wrap"
                                FontSize="14"
                                Foreground="{StaticResource TextColor}"
                                VerticalAlignment="Center"/>
-                </StackPanel>
+                </DockPanel>
                 
                 <ProgressBar x:Name="ProgressBar" Grid.Column="1"
                              Width="250" 
